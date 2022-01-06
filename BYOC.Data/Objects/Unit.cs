@@ -4,12 +4,20 @@ public class Unit : IInteractable
 {
     public Unit(int x, int y)
     {
-        X = x;
-        Y = y;
+        Position.X = x;
+        Position.Y = y;
     }
+
+    public Position Position { get; private set; } = new Position();
+    public Position MoveTarget { get; private set; } = new Position();
+
     
-    public int X { get; private set; }
-    public int Y { get; private set; }
+    
+    public void SetMoveTarget(int x, int y)
+    {
+        MoveTarget.X = x;
+        MoveTarget.Y = y;
+    }
 
     public void Interact(IInteractable item)
     {
@@ -23,8 +31,8 @@ public class Unit : IInteractable
 
     public void Move(int x, int y)
     {
-        X = x;
-        Y = y;
+        Position.X = x;
+        Position.Y = y;
     }
 
     public Actions Actions => Actions.Attack;

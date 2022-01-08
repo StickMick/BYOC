@@ -1,6 +1,6 @@
 namespace BYOC.Data.Objects;
-
 public interface IInteractable
 {
-    Actions Actions { get; }
+    BasicList<EnumActions> Actions { get; } //so more than one can be chosen.
+    //EnumActions Actions { get; }
 }

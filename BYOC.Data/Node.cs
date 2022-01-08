@@ -17,7 +17,7 @@ public class Node
     public float F => G + H;
     public NodeState State { get; set; }
     public Node? ParentNode { get; set; }
-    public List<IInteractable> Objects { get; set; }
+    public BasicList<IInteractable> Objects { get; set; } = new();
 }
 
 public enum NodeState

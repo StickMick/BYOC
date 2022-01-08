@@ -4,20 +4,20 @@ namespace BYOC.Data.StateMachines;
 
 public class State
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
     public Dictionary<State, Func<bool>> Transitions { get; set; } = new();
-    public Action OnTick { get; set; }
-    public Action OnEnter { get; set; }
-    public Action OnExit { get; set; }
+    public Action? OnTick { get; set; }
+    public Action? OnEnter { get; set; }
+    public Action? OnExit { get; set; }
 
     public void Enter(IStateMachine stateMachine)
     {
-        OnEnter.Invoke();
+        OnEnter?.Invoke();
     }
 
     public void Exit(IStateMachine stateMachine)
     {
-        OnExit.Invoke();
+        OnExit?.Invoke();
     }
 
     public void Tick(IStateMachine stateMachine)
@@ -30,7 +30,7 @@ public class State
                 return;
             }
         }
-        OnTick.Invoke();
+        OnTick?.Invoke();
     }
 
 }

@@ -7,6 +7,25 @@ Am I making it up as I go?
 
 *Definitely*.
 
+# TO DO
+Feel free to open an issue and claim something.
+
+* Web Server (This part actually gets a UI)
+  * Blazor Server
+  * Logins stored in app
+  * Admin account seeded through config variables
+  * Account Management
+    * Generate API Key
+  * Websockets (signalR) for game interaction
+    * Validate API Key
+
+* Add more systems to RTS
+  * Refine world generation
+  * Refine pathfinding
+  * Add buildings
+  * Add resources
+  * Add unit health/actions/death
+
 ### Plans
 * Multiplayer RTS
 * Intended as learning tool / game

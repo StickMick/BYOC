@@ -9,7 +9,7 @@ public class UnitRepository
         
     }
 
-    public List<Unit> Units { get; set; } = new List<Unit>();
+    public BasicList<Unit> Units { get; set; } = new ();
 
-    public Unit? GetUnit(int x, int y) => Units.FirstOrDefault(u => u.Position.X == x && u.Position.Y == y);
+    public Unit? GetUnit(int x, int y) => Units.FirstOrDefault(u => u!.Position!.X == x && u.Position.Y == y);
 }

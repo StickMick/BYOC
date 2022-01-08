@@ -6,11 +6,11 @@ namespace BYOC.Data.Controllers;
 
 public class GameController
 {
-    private CancellationToken _token;
+    private readonly CancellationToken _token;
     private readonly UnitController _unitController;
     private readonly WorldService _worldService;
 
-    private UnitRepository _unitRepository;
+    private readonly UnitRepository _unitRepository;
 
     public GameController(
         CancellationToken token,

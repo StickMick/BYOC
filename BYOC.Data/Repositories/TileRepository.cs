@@ -5,18 +5,18 @@ namespace BYOC.Data.Repositories;
 public class TileRepository : ITileRepository
 {
     private readonly World _world;
-
+    private readonly IRandomGenerator _random;
     public TileRepository(World world)
     {
         _world = world;
-        
-        Data.Add(Tile.Dirt,new Dirt());
-        Data.Add(Tile.Grass,new Grass());
-        Data.Add(Tile.Rock,new Rock());
-        Data.Add(Tile.Tree,new Tree());
+        _random = RandomHelpers.GetRandomGenerator();
+        //Data.Add(Tile.Dirt,new Dirt());
+        //Data.Add(Tile.Grass,new Grass());
+        //Data.Add(Tile.Rock,new Rock());
+        //Data.Add(Tile.Tree,new Tree());
     }
     
-    public Dictionary<Tile, IInteractable> Data = new Dictionary<Tile, IInteractable>();
+    //public Dictionary<Tile, IInteractable> Data = new Dictionary<Tile, IInteractable>();
     
     public Node? GetTile(int x, int y)
     {
@@ -34,15 +34,15 @@ public class TileRepository : ITileRepository
     {
         _world.Reset(width, height);
 
-        Array tileTypes = Enum.GetValues(typeof(Tile));
-        Random random = new Random();
-        
+        //Array tileTypes = Enum.GetValues(typeof(Tile));
+        //now you already have the list because of fast enum.
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
             {
-                Position position = new Position(i, j);
-                Node? node = new Node(position, random.Next(0,100) < 90);
+                Position position = new (i, j);
+                bool walkable = _random.NextBool(90); //this means there is a 90 percent chance of being walkable.
+                Node? node = new(position, walkable);
                 _world.Nodes[i, j] = node;
             }
         }
@@ -50,7 +50,7 @@ public class TileRepository : ITileRepository
     
     public IEnumerable<Node> GetWalkableAdjacentSquares(Position position)
     {
-        var proposedLocations = new List<Position>()
+        var proposedLocations = new BasicList<Position>()
         {
             new() { X = position.X - 1, Y = position.Y - 1 },
             new() { X = position.X,     Y = position.Y - 1 },
@@ -64,12 +64,12 @@ public class TileRepository : ITileRepository
             new() { X = position.X + 1, Y = position.Y },
         };
 
-        List<Node?> nodes = new List<Node?>();
+        BasicList<Node?> nodes = new ();
 
         proposedLocations.ForEach(p => nodes.Add(GetTile(p)));
 
-        nodes.RemoveAll(n => n == null);
+        nodes.RemoveAllOnly(n => n == null);
 
-        return nodes.Where(n => n.IsWalkable).AsEnumerable();
+        return nodes.Where(n => n!.IsWalkable).AsEnumerable()!;
     }
 }

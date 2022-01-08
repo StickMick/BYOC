@@ -6,7 +6,7 @@ namespace BYOC.Data.Controllers;
 
 public class UnitController
 {
-    public List<Unit> Units { get; set; } = new List<Unit>();
+    public BasicList<Unit> Units { get; set; } = new ();
     
     private readonly TileRepository _tileRepository;
 
@@ -26,7 +26,7 @@ public class UnitController
     public bool TryMoveUnit(Unit unit, int x, int y)
     {
         var tile = _tileRepository.GetTile(x, y);
-        if (tile.IsWalkable)
+        if (tile!.IsWalkable)
         {
             unit.SetMoveTarget(tile.Position);
             Console.WriteLine($"Moved to {x},{y}");

@@ -1,5 +1,4 @@
 using BYOC.Data.StateMachines;
-
 namespace BYOC.Data.Objects;
 
 public class Unit : IInteractable
@@ -7,16 +6,19 @@ public class Unit : IInteractable
     public Unit(int x, int y)
     {
         _stateMachine = new(this);
-
         Position = new Position(x, y);
     }
 
-    private UnitStateMachine _stateMachine;
+    private readonly UnitStateMachine _stateMachine;
 
-    public Position Position { get; private set; }
-    public Position MoveTarget { get; private set; }
+    public Position? Position { get; private set; }
+    public Position? MoveTarget { get; private set; }
 
-    public Position[] Path { get; set; }
+    public BasicList<Position> Path { get; set; } = new(); //so its already newed up.
+    public BasicList<EnumActions> Actions => new()
+    {
+        EnumActions.Attack
+    };
 
     public void Tick()
     {
@@ -25,7 +27,7 @@ public class Unit : IInteractable
     
     public void SetMoveTarget(int x, int y)
     {
-        MoveTarget.X = x;
+        MoveTarget!.X = x;
         MoveTarget.Y = y;
     }
     
@@ -36,12 +38,16 @@ public class Unit : IInteractable
 
     public void Interact(IInteractable item)
     {
-        Array possibleActions = Enum.GetValues(typeof(Actions));
-        
-        foreach(Actions action in possibleActions) {  
-            if (item.Actions.HasFlag(action))
-                Console.WriteLine($"I can [{action}] this [{item.GetType().Name}]");  
+        foreach (var action in Actions)
+        {
+            Console.WriteLine($"I can {action} this {item.GetType().Name}");
         }
+        //Array possibleActions = Enum.GetValues(typeof(Actions));
+        
+        //foreach(Actions action in possibleActions) {  
+        //    if (item.Actions.HasFlag(action))
+        //        Console.WriteLine($"I can [{action}] this [{item.GetType().Name}]");  
+        //}
     }
 
     public void Move()
@@ -50,5 +56,5 @@ public class Unit : IInteractable
             Position = Path.First();
     }
 
-    public Actions Actions => Actions.Attack;
+    //public EnumActions Actions => EnumActions.Attack;
 }

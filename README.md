@@ -14,6 +14,12 @@ Feel free to open an issue and claim something.
   * Blazor Server
   * Logins stored in app
   * Admin account seeded through config variables
+  * User Management
+    * Create User
+    * View Users
+    * Remove Users
+    * View API Keys
+    * Revoke API Keys
   * Account Management
     * Generate API Key
   * Websockets (signalR) for game interaction

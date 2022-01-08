@@ -17,18 +17,14 @@ public class UnitStateMachine : IStateMachine
             Name = "Idle1",
             OnEnter = () =>
             {
-                Console.WriteLine("Enter State 1");
                 test = 0;
             },
             OnExit = () =>
             {
-                Console.WriteLine("Exit State 1");
                 test = 0;
             },
             OnTick = () =>
             {
-                Console.WriteLine("Tick on State 1 {0}", DateTime.Now.ToLocalTime());
-                Console.WriteLine("Currently Idle at: {0},{1}", _unit.Position.X, _unit.Position.Y);
                 test++;
             }
         };
@@ -38,29 +34,24 @@ public class UnitStateMachine : IStateMachine
             Name = "Idle2",
             OnEnter = () =>
             {
-                Console.WriteLine("Enter State 2"); 
                 test = 0;
             },
             OnExit = () =>
             {
-                Console.WriteLine("Exit State 2");
                 test = 0;
             },
             OnTick = () =>
             {
-                Console.WriteLine("Tick on State 2 {0}", DateTime.Now.ToLocalTime());
                 test++;
             }
         };
         
         idleState1.Transitions.Add(idleState2, () =>
             {
-                Console.WriteLine("Evaluating {0} == 5", test);
                 return test == 5;
             });
         idleState2.Transitions.Add(idleState1, () =>
             {
-                Console.WriteLine("Evaluating {0} == 2", test);
                 return test == 2;
             });
 

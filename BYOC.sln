@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BYOC.Data", "BYOC.Data\BYOC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BYOC.Console", "BYOC.Console\BYOC.Console.csproj", "{0ABDFBD8-A9E6-4502-9E41-F0C777C7D84E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BYOC.Tests", "BYOC.Tests\BYOC.Tests.csproj", "{1D19576C-3688-4D6A-A671-4C4B86C8884C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{0ABDFBD8-A9E6-4502-9E41-F0C777C7D84E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0ABDFBD8-A9E6-4502-9E41-F0C777C7D84E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0ABDFBD8-A9E6-4502-9E41-F0C777C7D84E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D19576C-3688-4D6A-A671-4C4B86C8884C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D19576C-3688-4D6A-A671-4C4B86C8884C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D19576C-3688-4D6A-A671-4C4B86C8884C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D19576C-3688-4D6A-A671-4C4B86C8884C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

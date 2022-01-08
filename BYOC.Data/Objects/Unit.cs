@@ -1,22 +1,37 @@
+using BYOC.Data.StateMachines;
+
 namespace BYOC.Data.Objects;
 
 public class Unit : IInteractable
 {
     public Unit(int x, int y)
     {
-        Position.X = x;
-        Position.Y = y;
+        _stateMachine = new(this);
+
+        Position = new Position(x, y);
     }
 
-    public Position Position { get; private set; } = new Position();
-    public Position MoveTarget { get; private set; } = new Position();
+    private UnitStateMachine _stateMachine;
 
-    
+    public Position Position { get; private set; }
+    public Position MoveTarget { get; private set; }
+
+    public Position[] Path { get; set; }
+
+    public void Tick()
+    {
+        _stateMachine.Tick();
+    }
     
     public void SetMoveTarget(int x, int y)
     {
         MoveTarget.X = x;
         MoveTarget.Y = y;
+    }
+    
+    public void SetMoveTarget(Position position)
+    {
+        MoveTarget = position;
     }
 
     public void Interact(IInteractable item)
@@ -29,10 +44,10 @@ public class Unit : IInteractable
         }
     }
 
-    public void Move(int x, int y)
+    public void Move()
     {
-        Position.X = x;
-        Position.Y = y;
+        if (Path.Any()) 
+            Position = Path.First();
     }
 
     public Actions Actions => Actions.Attack;

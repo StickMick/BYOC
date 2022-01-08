@@ -44,6 +44,6 @@ public class GameController
 
     private void Tick()
     {
-        Console.WriteLine($"{DateTime.Now.ToString()}: Tick");
+        _unitController.Tick();
     }
 }

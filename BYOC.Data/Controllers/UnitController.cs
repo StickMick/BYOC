@@ -1,33 +1,34 @@
 using BYOC.Data.Objects;
+using BYOC.Data.Repositories;
 using BYOC.Data.Services;
 
 namespace BYOC.Data.Controllers;
 
 public class UnitController
 {
-    public List<Unit> Units { get; set; }
+    public List<Unit> Units { get; set; } = new List<Unit>();
     
-    private readonly WorldService _worldService;
+    private readonly TileRepository _tileRepository;
 
-    public UnitController(WorldService worldService)
+    public UnitController(TileRepository tileRepository)
     {
-        _worldService = worldService;
+        _tileRepository = tileRepository;
     }
 
     public void Tick()
     {
         foreach (var unit in Units)
         {
-            
+            unit.Tick();
         }
     }
 
     public bool TryMoveUnit(Unit unit, int x, int y)
     {
-        var tiles = _worldService.GetTile(x, y);
-        if (tiles.All(t => t.Actions.HasFlag(Actions.Walk)))
+        var tile = _tileRepository.GetTile(x, y);
+        if (tile.IsWalkable)
         {
-            unit.Move(x,y);
+            unit.SetMoveTarget(tile.Position);
             Console.WriteLine($"Moved to {x},{y}");
             return true;
         }

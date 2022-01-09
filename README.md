@@ -22,8 +22,22 @@ Feel free to open an issue and claim something.
     * Revoke API Keys
   * Account Management
     * Generate API Key
-  * Websockets (signalR) for game interaction
+    * Revoke API Key
+    * Delete Account
+  * Websockets (signalR) for game interaction, maybe supply other API types for the sake of allowing options
     * Validate API Key
+    * Tennanted access to server resources
+    * Issue commands e.g.
+      * Get List of Units
+        * Returns list of units
+      * Get Unit
+        * Returns detailed information about one unit
+      * Issue command to unit e.g.
+        * Move to
+        * Attack
+        * Gather
+        * Drop
+        * Build
 
 * Add more systems to RTS
   * Refine world generation

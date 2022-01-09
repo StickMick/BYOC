@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using BYOC.Server.Areas.Identity;
 using BYOC.Server.Data;
+using BYOC.Server.Hubs;
+using Microsoft.AspNetCore.ResponseCompression;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +44,12 @@ builder.Services.AddSingleton<CancellationTokenSource>();
 
 // ~~~~~~~~~~~~~~
 
+builder.Services.AddResponseCompression(opts =>
+{
+    opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+        new[] { "application/octet-stream" });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -67,6 +75,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapBlazorHub();
+
+app.MapHub<DemoHub>("/demo");
+
 app.MapFallbackToPage("/_Host");
 
 app.Services.GetService<ITileService>()?.Seed(30,30);

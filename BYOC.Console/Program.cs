@@ -1,51 +1,11 @@
-﻿using BYOC.Data;
-using BYOC.Data.Controllers;
-using BYOC.Data.Helpers;
-using BYOC.Data.Objects;
-using BYOC.Data.Repositories;
-using BYOC.Data.Services;
-using CommonBasicLibraries.AdvancedGeneralFunctionsAndProcesses.RandomGenerator;
-using BYOC.Data.StateMachines;
-World world = new ();
+﻿using BYOC.Console;
 
-TileRepository tileRepository = new (world);
-UnitRepository unitRepository = new ();
+Client client = new Client();
 
-WorldService worldService = new (tileRepository, unitRepository);
+await client.StartAsync();
 
-UnitController unitController = new (tileRepository, unitRepository);
+Console.WriteLine(client.IsConnected);
 
-var testUnit = new Unit(4, 4);
-unitRepository.Units.Add(testUnit);
-unitRepository.Units.Add(new Unit(5,5));
+await client.SendAsync("Test", "Message");
 
-GameController gameController = new (unitController, worldService);
-
-TileService tileService = new (tileRepository);
-
-var width = 30;
-var height = 30;
-
-tileService.Seed(width,height);
-
-IRandomGenerator random = RandomHelpers.GetRandomGenerator();
-
-
-//Random random = new Random();
-
-var path = tileService.GetPath(new Position(GetRandomWidth(), GetRandomHeight()), new Position(GetRandomWidth(), GetRandomHeight()));
-
-MapVisualizer.DrawPath(world, path);
-
-//var path = tileService.GetPath(new Position(random.Next(0,width), random.Next(0,height)), new Position(random.Next(0,width), random.Next(0,height)));
-
-await gameController.Start();
-
-int GetRandomWidth()
-{
-    return random.GetRandomNumber(width) - 1; //because 0 based
-}
-int GetRandomHeight()
-{
-    return random.GetRandomNumber(height) - 1; //because 0 based
-}
+await Task.Delay(1_000);

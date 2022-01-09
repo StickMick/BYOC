@@ -25,6 +25,7 @@ public class UnitStateMachine : IStateMachine
             },
             OnTick = () =>
             {
+                Console.WriteLine("Unit is in Idle State 1");
                 test++;
             }
         };
@@ -42,6 +43,7 @@ public class UnitStateMachine : IStateMachine
             },
             OnTick = () =>
             {
+                Console.WriteLine("Unit is in Idle State 2");
                 test++;
             }
         };

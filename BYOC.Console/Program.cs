@@ -13,16 +13,13 @@ UnitRepository unitRepository = new ();
 
 WorldService worldService = new (tileRepository, unitRepository);
 
-UnitController unitController = new (tileRepository);
+UnitController unitController = new (tileRepository, unitRepository);
 
 var testUnit = new Unit(4, 4);
-unitController.Units.Add(testUnit);
-unitController.Units.Add(new Unit(5,5));
+unitRepository.Units.Add(testUnit);
+unitRepository.Units.Add(new Unit(5,5));
 
-CancellationTokenSource tokenSource = new ();
-CancellationToken token = tokenSource.Token;
-
-GameController gameController = new (token, unitController, worldService);
+GameController gameController = new (unitController, worldService);
 
 TileService tileService = new (tileRepository);
 

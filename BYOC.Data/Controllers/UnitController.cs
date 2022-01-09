@@ -4,20 +4,20 @@ using BYOC.Data.Services;
 
 namespace BYOC.Data.Controllers;
 
-public class UnitController
+public class UnitController : IUnitController
 {
-    public BasicList<Unit> Units { get; set; } = new ();
-    
-    private readonly TileRepository _tileRepository;
+    private readonly ITileRepository _tileRepository;
+    private readonly IUnitRepository _unitRepository;
 
-    public UnitController(TileRepository tileRepository)
+    public UnitController(ITileRepository tileRepository, IUnitRepository unitRepository)
     {
         _tileRepository = tileRepository;
+        _unitRepository = unitRepository;
     }
 
     public void Tick()
     {
-        foreach (var unit in Units)
+        foreach (var unit in _unitRepository.Units)
         {
             unit.Tick();
         }

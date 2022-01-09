@@ -2,7 +2,7 @@ using BYOC.Data.Objects;
 
 namespace BYOC.Data.Repositories;
 
-public class UnitRepository
+public class UnitRepository : IUnitRepository
 {
     public UnitRepository()
     {

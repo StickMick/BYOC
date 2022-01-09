@@ -4,20 +4,17 @@ using BYOC.Data.Services;
 
 namespace BYOC.Data.Controllers;
 
-public class GameController
+public class GameController : IGameController
 {
-    private readonly CancellationToken _token;
-    private readonly UnitController _unitController;
-    private readonly WorldService _worldService;
+    private readonly IUnitController _unitController;
+    private readonly IWorldService _worldService;
 
-    private readonly UnitRepository _unitRepository;
+    private readonly IUnitRepository _unitRepository;
 
     public GameController(
-        CancellationToken token,
-        UnitController unitController,
-        WorldService worldService)
+        IUnitController unitController,
+        IWorldService worldService)
     {
-        _token = token;
         _unitController = unitController;
         _worldService = worldService;
     }
@@ -31,7 +28,7 @@ public class GameController
         Setup();
         
         
-        while (await periodicTimer.WaitForNextTickAsync(_token))
+        while (await periodicTimer.WaitForNextTickAsync())
         {
             Tick();
         }

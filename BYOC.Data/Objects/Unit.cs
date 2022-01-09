@@ -15,11 +15,7 @@ public class Unit : IInteractable
     public Position? MoveTarget { get; private set; }
 
     public BasicList<Position> Path { get; set; } = new(); //so its already newed up.
-    public BasicList<EnumActions> Actions => new()
-    {
-        EnumActions.Attack
-    };
-
+    
     public void Tick()
     {
         _stateMachine.Tick();
@@ -36,19 +32,7 @@ public class Unit : IInteractable
         MoveTarget = position;
     }
 
-    public void Interact(IInteractable item)
-    {
-        foreach (var action in Actions)
-        {
-            Console.WriteLine($"I can {action} this {item.GetType().Name}");
-        }
-        //Array possibleActions = Enum.GetValues(typeof(Actions));
-        
-        //foreach(Actions action in possibleActions) {  
-        //    if (item.Actions.HasFlag(action))
-        //        Console.WriteLine($"I can [{action}] this [{item.GetType().Name}]");  
-        //}
-    }
+
 
     public void Move()
     {

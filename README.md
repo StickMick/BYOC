@@ -11,8 +11,8 @@ Am I making it up as I go?
 Feel free to open an issue and claim something.
 
 * Web Server (This part actually gets a UI)
-  * Blazor Server
-  * Logins stored in app
+  * ~~Blazor Server~~
+  * ~~Logins stored in app~~
   * Admin account seeded through config variables
   * User Management
     * Create User

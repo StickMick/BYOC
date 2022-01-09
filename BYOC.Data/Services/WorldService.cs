@@ -3,14 +3,14 @@ using BYOC.Data.Repositories;
 
 namespace BYOC.Data.Services;
 
-public class WorldService
+public class WorldService : IWorldService
 {
-    private readonly TileRepository _tileRepository;
-    private readonly UnitRepository _unitRepository;
+    private readonly ITileRepository _tileRepository;
+    private readonly IUnitRepository _unitRepository;
 
     public WorldService(
-        TileRepository tileRepository,
-        UnitRepository unitRepository)
+        ITileRepository tileRepository,
+        IUnitRepository unitRepository)
     {
         _tileRepository = tileRepository;
         _unitRepository = unitRepository;

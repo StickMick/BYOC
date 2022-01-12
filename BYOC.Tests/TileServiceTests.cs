@@ -1,5 +1,6 @@
 using BYOC.Data;
 using BYOC.Data.Helpers;
+using BYOC.Data.Objects;
 using BYOC.Data.Repositories;
 using BYOC.Data.Services;
 using NUnit.Framework;

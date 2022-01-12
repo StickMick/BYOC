@@ -1,4 +1,4 @@
-﻿namespace BYOC.Data;
+﻿namespace BYOC.Data.Enums;
 public readonly partial record struct EnumTile
 {
     private enum EnumInfo

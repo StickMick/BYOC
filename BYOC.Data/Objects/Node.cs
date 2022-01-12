@@ -1,6 +1,4 @@
-using BYOC.Data.Objects;
-
-namespace BYOC.Data;
+namespace BYOC.Data.Objects;
 
 public class Node
 {

@@ -1,3 +1,5 @@
+using BYOC.Data.Objects;
+
 namespace BYOC.Data.Repositories;
 
 public interface ITileRepository

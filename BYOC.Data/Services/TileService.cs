@@ -1,3 +1,4 @@
+using BYOC.Data.Objects;
 using BYOC.Data.Repositories;
 
 namespace BYOC.Data.Services;
@@ -26,7 +27,7 @@ public class TileService : ITileService
         _tileRepository.Seed(width, height);
     }
     
-    public IEnumerable<Position> GetPath(Position from, Position to)
+    public BasicList<Position> GetPath(Position from, Position to)
     {
         Node? current = null;
         Node? start = _tileRepository.GetTile(from);

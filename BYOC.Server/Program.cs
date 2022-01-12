@@ -31,15 +31,23 @@ builder.Services
 
 // Placeholder for adding game stuff
 
-builder.Services.AddSingleton<World>(e => new World());
+builder.Services.AddSingleton<IWorld, World>(e => new World());
+
+// Raw data
 builder.Services.AddSingleton<ITileRepository, TileRepository>();
 builder.Services.AddSingleton<IUnitRepository, UnitRepository>();
+
+// Data access and logic
 builder.Services.AddSingleton<IWorldService, WorldService>();
 builder.Services.AddSingleton<ITileService, TileService>();
+builder.Services.AddSingleton<IUnitService, UnitService>();
+
+// commands - typically player specific
 builder.Services.AddSingleton<IUnitController, UnitController>();
 builder.Services.AddSingleton<IGameController, GameController>();
 
-builder.Services.AddSingleton<CancellationTokenSource>();
+// current user information, singleton for testing until hooked into the lifecycle
+builder.Services.AddSingleton<ISessionService, SessionService>();
 
 // ~~~~~~~~~~~~~~
 
@@ -80,8 +88,10 @@ app.MapHub<DemoHub>("/demo");
 app.MapFallbackToPage("/_Host");
 
 app.Services.GetService<ITileService>()?.Seed(30,30);
-app.Services.GetService<IUnitRepository>()?.Units.Add(new Unit(5,5));
-MapVisualizer.DrawToConsole(app.Services.GetService<World>()!);
+var testplayer = app.Services.GetService<IWorldService>()?.AddPlayer(new Player());
+Unit? unit = app.Services.GetService<IUnitRepository>()?.AddUnit(testplayer.Id, 5, 5)!;
+MapVisualizer.DrawToConsole(app.Services.GetService<IWorld>()!);
 app.Services.GetService<IGameController>()?.Start();
+app.Services.GetService<IUnitController>()?.TryMoveUnit(unit.Id, 29, 29);
 
 app.Run();

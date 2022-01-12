@@ -4,6 +4,5 @@ namespace BYOC.Data.Controllers;
 
 public interface IUnitController
 {
-    void Tick();
-    bool TryMoveUnit(Unit unit, int x, int y);
+    bool TryMoveUnit(Guid id, int x, int y);
 }

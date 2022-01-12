@@ -1,8 +1,10 @@
+using BYOC.Data.Objects;
+
 namespace BYOC.Data.Helpers;
 
 public static class MapVisualizer
 {
-    public static void DrawToConsole(World world)
+    public static void DrawToConsole(IWorld world)
     {
         for (int i = 0; i < world.Width; i++)
         {
@@ -22,7 +24,7 @@ public static class MapVisualizer
         }
     }
 
-    public static void DrawPath(World world, IEnumerable<Position> path)
+    public static void DrawPath(IWorld world, IEnumerable<Position> path)
     {
         Console.CursorVisible = false;
         DrawToConsole(world);

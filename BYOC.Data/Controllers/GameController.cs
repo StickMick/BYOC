@@ -6,16 +6,13 @@ namespace BYOC.Data.Controllers;
 
 public class GameController : IGameController
 {
-    private readonly IUnitController _unitController;
+    private readonly IUnitRepository _unitRepository;
     private readonly IWorldService _worldService;
 
-    private readonly IUnitRepository _unitRepository;
-
-    public GameController(
-        IUnitController unitController,
+    public GameController(IUnitRepository unitRepository,
         IWorldService worldService)
     {
-        _unitController = unitController;
+        _unitRepository = unitRepository;
         _worldService = worldService;
     }
     
@@ -41,6 +38,6 @@ public class GameController : IGameController
 
     private void Tick()
     {
-        _unitController.Tick();
+        _unitRepository.Units.ForEach(u=>u.Tick());
     }
 }

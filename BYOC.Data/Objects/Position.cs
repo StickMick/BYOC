@@ -1,4 +1,4 @@
-namespace BYOC.Data;
+namespace BYOC.Data.Objects;
 public record Position
 {
     public Position()

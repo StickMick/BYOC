@@ -6,58 +6,55 @@ public class UnitStateMachine : IStateMachine
     private readonly Unit _unit;
     private State _state;
     
-    private int test = 0;
-
     public UnitStateMachine(Unit unit)
     {
         _unit = unit;
         
-        State idleState1 = new State
+        State moveState = new State
         {
-            Name = "Idle1",
+            Name = "Move",
             OnEnter = () =>
             {
-                test = 0;
+                Console.WriteLine("Moving");
             },
             OnExit = () =>
             {
-                test = 0;
+                Console.WriteLine("Stopped Moving");
             },
             OnTick = () =>
             {
-                Console.WriteLine("Unit is in Idle State 1");
-                test++;
+                _unit.Move();
+                Console.WriteLine("Moved to position: {0},{1}", _unit.Position.X, unit.Position.Y);
             }
         };
 
-        State idleState2 = new State
+        State idleState = new State
         {
-            Name = "Idle2",
+            Name = "Idle",
             OnEnter = () =>
             {
-                test = 0;
+                Console.WriteLine("Idle");
             },
             OnExit = () =>
             {
-                test = 0;
+                Console.WriteLine("Stopped being Idle");
             },
             OnTick = () =>
             {
-                Console.WriteLine("Unit is in Idle State 2");
-                test++;
+                Console.WriteLine("Unit {0} is in Idle State", _unit.Id);
             }
         };
         
-        idleState1.Transitions.Add(idleState2, () =>
-            {
-                return test == 5;
-            });
-        idleState2.Transitions.Add(idleState1, () =>
-            {
-                return test == 2;
-            });
+        moveState.Transitions.Add(idleState, () =>
+        {
+            return !_unit.Path.Any();
+        });
+        idleState.Transitions.Add(moveState, () =>
+        {
+            return _unit.Path.Any();
+        });
 
-        _state = idleState1;
+        _state = idleState;
     }
     
     public void Tick()

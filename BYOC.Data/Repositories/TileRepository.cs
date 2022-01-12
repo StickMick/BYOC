@@ -4,19 +4,13 @@ namespace BYOC.Data.Repositories;
 
 public class TileRepository : ITileRepository
 {
-    private readonly World _world;
+    private readonly IWorld _world;
     private readonly IRandomGenerator _random;
-    public TileRepository(World world)
+    public TileRepository(IWorld world)
     {
         _world = world;
         _random = RandomHelpers.GetRandomGenerator();
-        //Data.Add(Tile.Dirt,new Dirt());
-        //Data.Add(Tile.Grass,new Grass());
-        //Data.Add(Tile.Rock,new Rock());
-        //Data.Add(Tile.Tree,new Tree());
     }
-    
-    //public Dictionary<Tile, IInteractable> Data = new Dictionary<Tile, IInteractable>();
     
     public Node? GetTile(int x, int y)
     {

@@ -9,10 +9,11 @@ public class Unit : IInteractable
         Position = new Position(x, y);
     }
 
+    public Guid Id { get; set; } = Guid.NewGuid();
     private readonly UnitStateMachine _stateMachine;
-
-    public Position? Position { get; private set; }
+    public Position Position { get; private set; }
     public Position? MoveTarget { get; private set; }
+    public Player Player { get; set; }
 
     public BasicList<Position> Path { get; set; } = new(); //so its already newed up.
     
@@ -36,8 +37,11 @@ public class Unit : IInteractable
 
     public void Move()
     {
-        if (Path.Any()) 
-            Position = Path.First();
+        if (Path.Any())
+        {
+            Position = Path.Last();
+            Path.RemoveSpecificItem(Position);
+        }  
     }
 
     //public EnumActions Actions => EnumActions.Attack;

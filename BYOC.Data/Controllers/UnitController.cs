@@ -6,33 +6,20 @@ namespace BYOC.Data.Controllers;
 
 public class UnitController : IUnitController
 {
-    private readonly ITileRepository _tileRepository;
-    private readonly IUnitRepository _unitRepository;
+    private readonly ITileService _tileService;
+    private readonly IUnitService _unitService;
 
-    public UnitController(ITileRepository tileRepository, IUnitRepository unitRepository)
+    public UnitController(ITileService tileService, IUnitService unitService)
     {
-        _tileRepository = tileRepository;
-        _unitRepository = unitRepository;
+        _tileService = tileService;
+        _unitService = unitService;
     }
 
-    public void Tick()
+    public bool TryMoveUnit(Guid id, int x, int y)
     {
-        foreach (var unit in _unitRepository.Units)
-        {
-            unit.Tick();
-        }
-    }
-
-    public bool TryMoveUnit(Unit unit, int x, int y)
-    {
-        var tile = _tileRepository.GetTile(x, y);
-        if (tile!.IsWalkable)
-        {
-            unit.SetMoveTarget(tile.Position);
-            Console.WriteLine($"Moved to {x},{y}");
-            return true;
-        }
-        Console.WriteLine($"Tried to move to [{x},{y}] but was blocked");
-        return false;
+        var unit = _unitService.GetUnit(id);
+        if (unit is null) return false;
+        unit.Path = _tileService.GetPath(unit.Position, new Position(x, y));
+        return true;
     }
 }

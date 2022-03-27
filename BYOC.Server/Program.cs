@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using BYOC.Server.Areas.Identity;
+using BYOC.Server.Automapper;
 using BYOC.Server.Data;
 using BYOC.Server.Hubs;
 using BYOC.Server.Middleware;
@@ -30,6 +31,7 @@ var logger = new LoggerConfiguration()
 
 builder.Logging.AddSerilog(logger);
 builder.Services.AddSingleton<ILogger>(logger);
+builder.Services.AddAutoMapper(mapper => mapper.AddProfile<AutoMapperProfile>());
 
 SetupDatabases(builder);
 
@@ -74,7 +76,7 @@ app.MapBlazorHub();
 
 app.UseMiddleware<JwtMiddleware>();
 
-app.MapHub<DemoHub>("/demo");
+app.MapHub<GameHub>("/game");
 
 app.MapFallbackToPage("/_Host");
 
@@ -171,7 +173,7 @@ void StartGame(WebApplication webApplication)
     var testPlayer = worldService.AddPlayer(new Player());
     var unit = unitRepository.AddUnit(testPlayer.Id, 1, 1)!;
     
-    // MapVisualizer.DrawToConsole(world);
+    MapVisualizer.DrawToConsole(world);
     
     gameController.Start(options =>
     {

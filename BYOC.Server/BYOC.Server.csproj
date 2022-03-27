@@ -9,6 +9,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="AutoMapper" Version="11.0.1" />
+        <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.1" />
         <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.1" />
@@ -27,6 +29,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\BYOC.Data\BYOC.Data.csproj" />
+      <ProjectReference Include="..\BYOC.Shared\BYOC.Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>

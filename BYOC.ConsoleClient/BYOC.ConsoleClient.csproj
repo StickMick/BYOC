@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\BYOC.Data\BYOC.Data.csproj" />
+      <ProjectReference Include="..\BYOC.Shared\BYOC.Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>

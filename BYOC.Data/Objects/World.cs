@@ -6,7 +6,7 @@ public class World : IWorld
     public int Width { get; set; }
     public int Height { get; set; }
     [AllowNull]
-    public Node?[,] Nodes { get; set; }
+    public List<Node> Nodes { get; set; }
 
     public BasicList<Player> Players { get; set; } = new();
 
@@ -14,6 +14,6 @@ public class World : IWorld
     {
         Width = width;
         Height = height;
-        Nodes = new Node?[Width, Height];
+        Nodes = new List<Node>();
     }
 }

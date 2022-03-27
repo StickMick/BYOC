@@ -1,38 +1,14 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Json;
-using BYOC.Console.Authorization;
+using BYOC.ConsoleClient.Authorization;
+using BYOC.Shared.DTOs;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.WebUtilities;
-using Serilog;
 
-namespace BYOC.Console;
+namespace BYOC.ConsoleClient;
 
-public class Client
+public partial class Client
 {
-    private readonly ILogger _logger;
-    
-    private HubConnection? hubConnection;
-    private List<string> messages = new List<string>();
-    private string? userInput;
-    private string? messageInput;
-    
-    private JwtSecurityToken? _token;
-    private string _tokenString;
-
-    private HttpClientHandler _handler;
-
-    public Client(ILogger logger)
-    {
-        _logger = logger;
-        _handler = new HttpClientHandler();
-        _handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-        _handler.ServerCertificateCustomValidationCallback = 
-            (httpRequestMessage, cert, cetChain, policyErrors) =>
-            {
-                return true;
-            };
-    }
-
     private async Task<string> GetToken(string key)
     {
         if (_token == null || _token.ValidTo < DateTime.UtcNow)
@@ -75,8 +51,8 @@ public class Client
     
     public async Task StartAsync(CancellationToken token = default)
     {
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl("https://localhost:7111/demo", (opts) =>
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl("https://localhost:7111/game", (opts) =>
             {
                 opts.AccessTokenProvider = async () => await GetToken("123456");
 
@@ -91,30 +67,30 @@ public class Client
             })
             .Build();
 
-        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        _hubConnection.On<WorldDTO>("GetWorldAsync", (world) =>
         {
-            _logger.Information("Received Message From {User}: {Message}", user, message);
+            _logger.Information("Fetched World");
         });
 
-        await hubConnection.StartAsync(token);
+        await _hubConnection.StartAsync(token);
     }
-
-    public async Task SendAsync(string username, string message)
-    {
-        if (hubConnection is not null)
-        {
-            await hubConnection.SendAsync("SendMessage", username, message);
-        }
-    }
-
+    
     public bool IsConnected =>
-        hubConnection?.State == HubConnectionState.Connected;
+        _hubConnection?.State == HubConnectionState.Connected;
 
     public async ValueTask DisposeAsync()
     {
-        if (hubConnection is not null)
+        if (_hubConnection is not null)
         {
-            await hubConnection.DisposeAsync();
+            await _hubConnection.DisposeAsync();
+        }
+    }
+
+    public async Task Disconnect(CancellationToken token = default)
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.StopAsync(token);
         }
     }
 }

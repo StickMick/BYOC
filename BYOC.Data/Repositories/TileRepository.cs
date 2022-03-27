@@ -15,7 +15,7 @@ public class TileRepository : ITileRepository
     public Node? GetTile(int x, int y)
     {
         if (x >= 0 && x <= _world.Width - 1 && y >= 0 && y <= _world.Height - 1)
-            return _world.Nodes[x, y];
+            return _world.Nodes.SingleOrDefault(n=>n.Position.X == x && n.Position.Y == y);
         return null;
     }
     
@@ -36,8 +36,8 @@ public class TileRepository : ITileRepository
             {
                 Position position = new (i, j);
                 bool walkable = _random.NextBool(90); //this means there is a 90 percent chance of being walkable.
-                Node? node = new(position, walkable);
-                _world.Nodes[i, j] = node;
+                Node node = new(position, walkable);
+                _world.Nodes.Add(node);
             }
         }
     }

@@ -12,7 +12,7 @@ public static class MapVisualizer
             {
                 Console.SetCursorPosition(i, j);
                 
-                if (world.Nodes[i, j]?.IsWalkable ?? false)
+                if (world.Nodes.SingleOrDefault(n=>n.Position.X == i && n.Position.Y == j)?.IsWalkable ?? false)
                 {
                     Console.Write(' ');
                 }

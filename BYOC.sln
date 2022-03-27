@@ -2,11 +2,13 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BYOC.Data", "BYOC.Data\BYOC.Data.csproj", "{C9116874-74AA-48BD-B15A-C6BBFC15ED77}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BYOC.Console", "BYOC.Console\BYOC.Console.csproj", "{0ABDFBD8-A9E6-4502-9E41-F0C777C7D84E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BYOC.ConsoleClient", "BYOC.ConsoleClient\BYOC.ConsoleClient.csproj", "{0ABDFBD8-A9E6-4502-9E41-F0C777C7D84E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BYOC.Tests", "BYOC.Tests\BYOC.Tests.csproj", "{1D19576C-3688-4D6A-A671-4C4B86C8884C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BYOC.Server", "BYOC.Server\BYOC.Server.csproj", "{026C6FE5-F62C-45F0-AA9F-F56A75364470}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BYOC.Shared", "BYOC.Shared\BYOC.Shared.csproj", "{6841F963-D8FA-43E9-A3E1-CA925FB47B99}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,5 +32,9 @@ Global
 		{026C6FE5-F62C-45F0-AA9F-F56A75364470}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{026C6FE5-F62C-45F0-AA9F-F56A75364470}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{026C6FE5-F62C-45F0-AA9F-F56A75364470}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6841F963-D8FA-43E9-A3E1-CA925FB47B99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6841F963-D8FA-43E9-A3E1-CA925FB47B99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6841F963-D8FA-43E9-A3E1-CA925FB47B99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6841F963-D8FA-43E9-A3E1-CA925FB47B99}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

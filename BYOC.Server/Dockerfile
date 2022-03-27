@@ -5,6 +5,7 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
+COPY ["BYOC.Data/BYOC.Data.csproj", "BYOC.Data/"]
 COPY ["BYOC.Server/BYOC.Server.csproj", "BYOC.Server/"]
 RUN dotnet restore "BYOC.Server/BYOC.Server.csproj"
 COPY . .

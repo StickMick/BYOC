@@ -1,11 +1,13 @@
 using BYOC.Data.StateMachines;
+using Serilog;
+
 namespace BYOC.Data.Objects;
 
 public class Unit : IInteractable
 {
-    public Unit(int x, int y)
+    public Unit(ILogger logger, int x, int y)
     {
-        _stateMachine = new(this);
+        _stateMachine = new(logger, this);
         Position = new Position(x, y);
     }
 

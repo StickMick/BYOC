@@ -1,4 +1,5 @@
 using BYOC.Data.Objects;
+using Serilog;
 
 namespace BYOC.Data.StateMachines;
 public class UnitStateMachine : IStateMachine
@@ -6,7 +7,9 @@ public class UnitStateMachine : IStateMachine
     private readonly Unit _unit;
     private State _state;
     
-    public UnitStateMachine(Unit unit)
+    public UnitStateMachine(
+        ILogger logger,
+        Unit unit)
     {
         _unit = unit;
         
@@ -15,16 +18,16 @@ public class UnitStateMachine : IStateMachine
             Name = "Move",
             OnEnter = () =>
             {
-                Console.WriteLine("Moving");
+                logger.Information("Moving unit");
             },
             OnExit = () =>
             {
-                Console.WriteLine("Stopped Moving");
+                logger.Information("Stopped Moving Unit");
             },
             OnTick = () =>
             {
                 _unit.Move();
-                Console.WriteLine("Moved to position: {0},{1}", _unit.Position.X, unit.Position.Y);
+                logger.Information("Moved to position: {0},{1}", _unit.Position.X, unit.Position.Y);
             }
         };
 
@@ -33,15 +36,15 @@ public class UnitStateMachine : IStateMachine
             Name = "Idle",
             OnEnter = () =>
             {
-                Console.WriteLine("Idle");
+                logger.Information("Idle");
             },
             OnExit = () =>
             {
-                Console.WriteLine("Stopped being Idle");
+                logger.Information("Stopped being Idle");
             },
             OnTick = () =>
             {
-                Console.WriteLine("Unit {0} is in Idle State", _unit.Id);
+                logger.Information("Unit {0} is in Idle State", _unit.Id);
             }
         };
         

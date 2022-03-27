@@ -1,10 +1,14 @@
 ﻿using BYOC.Console;
+using Serilog;
 
-Client client = new Client();
+var logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .CreateLogger();
+
+Client client = new Client(logger);
 
 await client.StartAsync();
-
-Console.WriteLine(client.IsConnected);
 
 await client.SendAsync("Test", "Message");
 

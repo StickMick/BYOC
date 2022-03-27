@@ -1,61 +1,48 @@
-using BYOC.Data;
+using System.Text;
 using BYOC.Data.Controllers;
 using BYOC.Data.Helpers;
 using BYOC.Data.Objects;
 using BYOC.Data.Repositories;
 using BYOC.Data.Services;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using BYOC.Server.Areas.Identity;
 using BYOC.Server.Data;
 using BYOC.Server.Hubs;
+using BYOC.Server.Middleware;
+using BYOC.Server.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.IdentityModel.Tokens;
+using Serilog;
+using ILogger = Serilog.ILogger;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
-builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
-builder.Services
-    .AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
+ConfigurationManager configuration = builder.Configuration;
 
-// Placeholder for adding game stuff
+var logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .CreateLogger();
 
-builder.Services.AddSingleton<IWorld, World>(e => new World());
+builder.Logging.AddSerilog(logger);
+builder.Services.AddSingleton<ILogger>(logger);
 
-// Raw data
-builder.Services.AddSingleton<ITileRepository, TileRepository>();
-builder.Services.AddSingleton<IUnitRepository, UnitRepository>();
+SetupDatabases(builder);
 
-// Data access and logic
-builder.Services.AddSingleton<IWorldService, WorldService>();
-builder.Services.AddSingleton<ITileService, TileService>();
-builder.Services.AddSingleton<IUnitService, UnitService>();
+SetupSecurity(builder);
 
-// commands - typically player specific
-builder.Services.AddSingleton<IUnitController, UnitController>();
-builder.Services.AddSingleton<IGameController, GameController>();
+SetupWeb(builder);
 
-// current user information, singleton for testing until hooked into the lifecycle
-builder.Services.AddSingleton<ISessionService, SessionService>();
+SetupGame(builder);
 
-// ~~~~~~~~~~~~~~
 
-builder.Services.AddResponseCompression(opts =>
-{
-    opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-        new[] { "application/octet-stream" });
-});
+builder.Services.AddScoped<IUserService, UserService>();
+
+
 
 var app = builder.Build();
 
@@ -63,6 +50,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 else
 {
@@ -83,15 +72,115 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapBlazorHub();
 
+app.UseMiddleware<JwtMiddleware>();
+
 app.MapHub<DemoHub>("/demo");
 
 app.MapFallbackToPage("/_Host");
 
-app.Services.GetService<ITileService>()?.Seed(30,30);
-var testplayer = app.Services.GetService<IWorldService>()?.AddPlayer(new Player());
-Unit? unit = app.Services.GetService<IUnitRepository>()?.AddUnit(testplayer.Id, 5, 5)!;
-MapVisualizer.DrawToConsole(app.Services.GetService<IWorld>()!);
-app.Services.GetService<IGameController>()?.Start();
-app.Services.GetService<IUnitController>()?.TryMoveUnit(unit.Id, 29, 29);
+StartGame(app);
 
 app.Run();
+
+void SetupSecurity(WebApplicationBuilder webApplicationBuilder)
+{
+    webApplicationBuilder.Services
+        .AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
+
+    webApplicationBuilder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.SaveToken = true;
+            options.RequireHttpsMetadata = false;
+            options.TokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidAudience = configuration["JWT:ValidAudience"],
+                ValidIssuer = configuration["JWT:ValidIssuer"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
+            };
+        });
+}
+
+void SetupDatabases(WebApplicationBuilder webApplicationBuilder)
+{
+    var connectionString = webApplicationBuilder.Configuration.GetConnectionString("DefaultConnection");
+    webApplicationBuilder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite(connectionString));
+    webApplicationBuilder.Services.AddDatabaseDeveloperPageExceptionFilter();
+    webApplicationBuilder.Services
+        .AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+        .AddEntityFrameworkStores<ApplicationDbContext>();
+}
+
+void SetupWeb(WebApplicationBuilder webApplicationBuilder)
+{
+    webApplicationBuilder.Services.AddRazorPages();
+    webApplicationBuilder.Services.AddServerSideBlazor();
+    webApplicationBuilder.Services.AddResponseCompression(opts =>
+    {
+        opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+            new[] {"application/octet-stream"});
+    });
+    webApplicationBuilder.Services.AddSwaggerGen();
+}
+
+void SetupGame(WebApplicationBuilder webApplicationBuilder)
+{
+    webApplicationBuilder.Services.AddSingleton<IWorld, World>(e => new World());
+
+    // Raw data
+    webApplicationBuilder.Services.AddSingleton<ITileRepository, TileRepository>();
+    webApplicationBuilder.Services.AddSingleton<IUnitRepository, UnitRepository>();
+
+    // Data access and logic
+    webApplicationBuilder.Services.AddSingleton<IWorldService, WorldService>();
+    webApplicationBuilder.Services.AddSingleton<ITileService, TileService>();
+    webApplicationBuilder.Services.AddSingleton<IUnitService, UnitService>();
+
+    // commands - typically player specific
+    webApplicationBuilder.Services.AddSingleton<IUnitController, UnitController>();
+    webApplicationBuilder.Services.AddSingleton<IGameController, GameController>();
+
+    // current user information, singleton for testing until hooked into the lifecycle
+    webApplicationBuilder.Services.AddSingleton<ISessionService, SessionService>();
+
+    // ~~~~~~~~~~~~~~
+}
+
+void StartGame(WebApplication webApplication)
+{
+    var world = webApplication.Services.GetRequiredService<IWorld>();
+    var worldService = webApplication.Services.GetRequiredService<IWorldService>();
+    var tileService = webApplication.Services.GetRequiredService<ITileService>();
+    var gameController = webApplication.Services.GetRequiredService<IGameController>();
+    var unitRepository = webApplication.Services.GetRequiredService<IUnitRepository>();
+    var unitController = webApplication.Services.GetRequiredService<IUnitController>();
+    
+    // create the world
+    var width = Convert.ToInt32(configuration["Game:Width"]);
+    var height = Convert.ToInt32(configuration["Game:Height"]);
+    
+    tileService.Seed(width,height);
+    var testPlayer = worldService.AddPlayer(new Player());
+    var unit = unitRepository.AddUnit(testPlayer.Id, 1, 1)!;
+    
+    // MapVisualizer.DrawToConsole(world);
+    
+    gameController.Start(options =>
+    {
+        options.TickRate = 1_000;
+        // options.Tick += (sender, eventArgs) =>
+        // {
+        //     MapVisualizer.DrawToConsole(world);
+        // };
+    });
+    
+    unitController.TryMoveUnit(unit.Id, width-1, height-1);
+}

@@ -9,6 +9,7 @@
     <ItemGroup>
       <PackageReference Include="CommonBasicLibraries" Version="5.0.6" />
       <PackageReference Include="FastEnumGenerator" Version="1.0.5" PrivateAssets="all" />
+      <PackageReference Include="Serilog" Version="2.10.0" />
     </ItemGroup>
 
 </Project>

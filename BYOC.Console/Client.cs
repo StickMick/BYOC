@@ -1,36 +1,91 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Json;
+using BYOC.Console.Authorization;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.AspNetCore.WebUtilities;
+using Serilog;
 
 namespace BYOC.Console;
 
 public class Client
 {
+    private readonly ILogger _logger;
+    
     private HubConnection? hubConnection;
     private List<string> messages = new List<string>();
     private string? userInput;
     private string? messageInput;
+    
+    private JwtSecurityToken? _token;
+    private string _tokenString;
 
-    public async Task StartAsync()
+    private HttpClientHandler _handler;
+
+    public Client(ILogger logger)
     {
-        var handler = new HttpClientHandler();
-        handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-        handler.ServerCertificateCustomValidationCallback = 
+        _logger = logger;
+        _handler = new HttpClientHandler();
+        _handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+        _handler.ServerCertificateCustomValidationCallback = 
             (httpRequestMessage, cert, cetChain, policyErrors) =>
             {
                 return true;
             };
+    }
 
-        var client = new HttpClient(handler);
+    private async Task<string> GetToken(string key)
+    {
+        if (_token == null || _token.ValidTo < DateTime.UtcNow)
+        {
+            await GetTokenFromServer(key);
+        }
+        else
+        {
+            _logger.Information("Existing token reused");    
+        }
+        return _tokenString;
+    }
 
+    private async Task<string> GetTokenFromServer(string key)
+    {
+        const string url = "https://localhost:7111/api/auth";
+        var param = new Dictionary<string, string>()
+        {
+            { "apiKey", key }
+        };
+
+        var newUrl = new Uri(QueryHelpers.AddQueryString(url, param));
         
+        var client = new HttpClient(_handler);
+        
+        var result = await client.GetFromJsonAsync<GetTokenRequest>(newUrl);
+
+        if (string.IsNullOrEmpty(result?.JwtToken))
+        {
+            throw new Exception("Failed to get token");
+        }
+
+        _logger.Information("New token acquired");
+        _tokenString = result.JwtToken;
+
+        var handler = new JwtSecurityTokenHandler();
+        _token = (handler.ReadToken(result.JwtToken) as JwtSecurityToken)!;
+        return result.JwtToken;
+    }
+    
+    public async Task StartAsync(CancellationToken token = default)
+    {
         hubConnection = new HubConnectionBuilder()
             .WithUrl("https://localhost:7111/demo", (opts) =>
             {
+                opts.AccessTokenProvider = async () => await GetToken("123456");
+
                 opts.HttpMessageHandlerFactory = (message) =>
                 {
                     if (message is HttpClientHandler clientHandler)
                         // always verify the SSL certificate
                         clientHandler.ServerCertificateCustomValidationCallback +=
-                            (sender, certificate, chain, sslPolicyErrors) => { return true; };
+                            (_, _, _, _) => true;
                     return message;
                 };
             })
@@ -38,11 +93,10 @@ public class Client
 
         hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
         {
-            var encodedMsg = $"{user}: {message}";
-            System.Console.WriteLine(encodedMsg);
+            _logger.Information("Received Message From {User}: {Message}", user, message);
         });
 
-        await hubConnection.StartAsync();
+        await hubConnection.StartAsync(token);
     }
 
     public async Task SendAsync(string username, string message)

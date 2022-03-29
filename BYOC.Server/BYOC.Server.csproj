@@ -34,7 +34,7 @@
 
     <ItemGroup>
       <Folder Include="Areas" />
-      <Folder Include="Helpers" />
+      <Folder Include="Extensions" />
     </ItemGroup>
 
 </Project>

@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using BYOC.Server.Models;
+using BYOC.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -12,23 +13,24 @@ namespace BYOC.Server.Controllers;
 public class AuthController : Controller
 {
     private readonly IConfiguration _configuration;
+    private readonly IUserService _userService;
 
-    public AuthController(IConfiguration configuration)
+    public AuthController(
+        IConfiguration configuration,
+        IUserService userService)
     {
         _configuration = configuration;
+        _userService = userService;
     }
 
     [HttpGet]
-    public async Task<IActionResult> Login([FromQuery] string apiKey)
+    public async Task<IActionResult> Login([FromQuery] string apiKey, CancellationToken token = default)
     {
-        var appkeyexists = true;
-        if(appkeyexists){       
-            //create claims list
-            List<Claim> authClaims = new List<Claim>();
-            authClaims.Add(new Claim("apiKey",apiKey,ClaimValueTypes.String));
-            authClaims.Add(new Claim("role","filler",ClaimValueTypes.String));
-            authClaims.Add(new Claim("email", "test@example.com", ClaimValueTypes.String));
-
+        var user = await _userService.FindByApiKey(apiKey, token);
+        if (user is not null)
+        {
+            var claims = await _userService.GetClaimsAsync(user, token);
+            
             //create a signing secret
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
             var signinCredentials = new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256);  
@@ -37,7 +39,7 @@ public class AuthController : Controller
                 issuer: _configuration["JWT:ValidIssuer"],
                 audience: _configuration["JWT:ValidAudience"],
                 expires: DateTime.Now.AddMinutes(Convert.ToDouble(_configuration["JWT:TokenExpirationInMinutes"])),
-                claims: authClaims,
+                claims: claims,
                 signingCredentials: signinCredentials
             );
             //create token
@@ -45,8 +47,8 @@ public class AuthController : Controller
             //return token
             return new OkObjectResult(new AuthToken {JwtToken = tokenString});
 
-        } else {
-            return Unauthorized();
         }
+
+        return Unauthorized();
     }
 }

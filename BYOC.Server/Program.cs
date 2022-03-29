@@ -5,15 +5,17 @@ using BYOC.Data.Objects;
 using BYOC.Data.Repositories;
 using BYOC.Data.Services;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using BYOC.Server.Areas.Identity;
 using BYOC.Server.Automapper;
 using BYOC.Server.Data;
+using BYOC.Server.Data.Entities;
+using BYOC.Server.Helpers;
 using BYOC.Server.Hubs;
 using BYOC.Server.Middleware;
 using BYOC.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -41,10 +43,8 @@ SetupWeb(builder);
 
 SetupGame(builder);
 
-
+builder.Services.AddScoped<DatabaseSeeder>();
 builder.Services.AddScoped<IUserService, UserService>();
-
-
 
 var app = builder.Build();
 
@@ -80,6 +80,8 @@ app.MapHub<GameHub>("/game");
 
 app.MapFallbackToPage("/_Host");
 
+await SeedDatabase();
+
 StartGame(app);
 
 app.Run();
@@ -87,7 +89,7 @@ app.Run();
 void SetupSecurity(WebApplicationBuilder webApplicationBuilder)
 {
     webApplicationBuilder.Services
-        .AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
+        .AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ApplicationUser>>();
 
     webApplicationBuilder.Services.AddAuthentication(options =>
         {
@@ -117,7 +119,7 @@ void SetupDatabases(WebApplicationBuilder webApplicationBuilder)
         options.UseSqlite(connectionString));
     webApplicationBuilder.Services.AddDatabaseDeveloperPageExceptionFilter();
     webApplicationBuilder.Services
-        .AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+        .AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
         .AddEntityFrameworkStores<ApplicationDbContext>();
 }
 
@@ -185,4 +187,14 @@ void StartGame(WebApplication webApplication)
     });
     
     unitController.TryMoveUnit(unit.Id, width-1, height-1);
+}
+
+async Task SeedDatabase() //can be placed at the very bottom under app.Run()
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+        await dbInitializer.MigrateAsync();
+        await dbInitializer.SeedAsync();
+    }
 }

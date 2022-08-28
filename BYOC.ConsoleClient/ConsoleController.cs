@@ -1,3 +1,7 @@
+using BYOC.ConsoleClient.Helpers;
+using BYOC.ConsoleClient.SignalrClient;
+using BYOC.Data.Objects;
+using BYOC.Shared.DTOs;
 using Serilog;
 
 namespace BYOC.ConsoleClient;
@@ -38,6 +42,12 @@ public class ConsoleController
                 break;
         }
 
-        await Task.Delay(1000);
+        await Task.Delay(1000, token);
+    }
+
+    public async Task DrawWorld(CancellationToken token)
+    {
+        await _client.GetWorldAsync(token);
+        await Task.Delay(1000, token);
     }
 }

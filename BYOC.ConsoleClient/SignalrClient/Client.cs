@@ -1,11 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Json;
-using BYOC.ConsoleClient.Authorization;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.AspNetCore.WebUtilities;
 using Serilog;
 
-namespace BYOC.ConsoleClient;
+namespace BYOC.ConsoleClient.SignalrClient;
 
 public partial class Client
 {

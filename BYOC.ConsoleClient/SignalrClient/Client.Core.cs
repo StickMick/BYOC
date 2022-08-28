@@ -1,31 +1,32 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Json;
-using BYOC.ConsoleClient.Authorization;
-using BYOC.Shared.DTOs;
+using BYOC.ConsoleClient.RequestModels;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.WebUtilities;
 
-namespace BYOC.ConsoleClient;
+namespace BYOC.ConsoleClient.SignalrClient;
 
 public partial class Client
 {
     private async Task<string> GetToken(string key)
     {
-        if (_token == null || _token.ValidTo < DateTime.UtcNow)
+        if (_token == null || _tokenString == null || _token.ValidTo < DateTime.UtcNow)
         {
-            await GetTokenFromServer(key);
+            _tokenString = await GetTokenStringFromServer(key);
+            _token = (new JwtSecurityTokenHandler().ReadToken(_tokenString) as JwtSecurityToken)!;
         }
         else
         {
-            _logger.Information("Existing token reused");    
+            _logger.Information("Existing token reused");
         }
+
         return _tokenString;
     }
 
-    private async Task<string> GetTokenFromServer(string key)
+    private async Task<string> GetTokenStringFromServer(string key)
     {
         const string url = "https://localhost:7111/api/auth";
-        var param = new Dictionary<string, string>()
+        var param = new Dictionary<string, string?>()
         {
             { "apiKey", key }
         };
@@ -42,19 +43,16 @@ public partial class Client
         }
 
         _logger.Information("New token acquired");
-        _tokenString = result.JwtToken;
-
-        var handler = new JwtSecurityTokenHandler();
-        _token = (handler.ReadToken(result.JwtToken) as JwtSecurityToken)!;
+        
         return result.JwtToken;
     }
     
-    public async Task StartAsync(CancellationToken token = default)
+    public async Task StartAsync(string apiKey, CancellationToken token = default)
     {
         _hubConnection = new HubConnectionBuilder()
             .WithUrl("https://localhost:7111/game", (opts) =>
             {
-                opts.AccessTokenProvider = async () => await GetToken("123456");
+                opts.AccessTokenProvider = async () => await GetToken(apiKey);
 
                 opts.HttpMessageHandlerFactory = (message) =>
                 {
@@ -67,14 +65,11 @@ public partial class Client
             })
             .Build();
 
-        _hubConnection.On<WorldDTO>("GetWorldAsync", (world) =>
-        {
-            _logger.Information("Fetched World");
-        });
+        BindResponseCallbacks();
 
         await _hubConnection.StartAsync(token);
     }
-    
+
     public bool IsConnected =>
         _hubConnection?.State == HubConnectionState.Connected;
 

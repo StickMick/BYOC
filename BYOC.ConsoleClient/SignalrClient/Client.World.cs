@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.SignalR.Client;
 
-namespace BYOC.ConsoleClient;
+namespace BYOC.ConsoleClient.SignalrClient;
 
 public partial class Client
 {

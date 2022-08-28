@@ -1,4 +1,4 @@
-namespace BYOC.ConsoleClient.Authorization;
+namespace BYOC.ConsoleClient.RequestModels;
 
 public class GetTokenRequest
 {

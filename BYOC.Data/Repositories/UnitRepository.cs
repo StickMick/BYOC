@@ -1,3 +1,4 @@
+using BYOC.Data.Events;
 using BYOC.Data.Objects;
 using CommonBasicLibraries.AdvancedGeneralFunctionsAndProcesses.BasicExtensions;
 using Serilog;
@@ -16,6 +17,7 @@ public class UnitRepository : IUnitRepository
     }
 
     public BasicList<Unit> Units => _world.Players.SelectMany(p => p.Units).ToBasicList();
+    public EventHandler<UnitCreatedEventArgs> OnUnitCreated { get; set; }
 
     public Unit? GetUnit(Guid Id) => Units.FirstOrDefault(u => u.Id == Id);
     public Unit? AddUnit(Guid playerId, int x, int y)
@@ -26,9 +28,19 @@ public class UnitRepository : IUnitRepository
         {
             unit.Player = player;
             player.Units.Add(unit);
+            NotifyCreatedEvent(unit);
             return unit;
         }
 
         return null;
+    }
+
+    public void NotifyCreatedEvent(Unit unit)
+    {
+        EventHandler<UnitCreatedEventArgs>? handler = OnUnitCreated;
+        handler?.Invoke(this, new UnitCreatedEventArgs
+        {
+            Unit = unit
+        });
     }
 }

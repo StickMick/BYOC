@@ -1,5 +1,7 @@
 using System.Text;
+using AutoMapper;
 using BYOC.Data.Controllers;
+using BYOC.Data.Events;
 using BYOC.Data.Helpers;
 using BYOC.Data.Objects;
 using BYOC.Data.Repositories;
@@ -17,6 +19,7 @@ using BYOC.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using ILogger = Serilog.ILogger;
@@ -139,28 +142,46 @@ void SetupGame(WebApplicationBuilder webApplicationBuilder)
 {
     webApplicationBuilder.Services.AddSingleton<IWorld, World>(e => new World());
 
-    // Raw data
+    // Raw data - singleton for now since they are stored in memory on the object
     webApplicationBuilder.Services.AddSingleton<ITileRepository, TileRepository>();
-    webApplicationBuilder.Services.AddSingleton<IUnitRepository, UnitRepository>();
+    webApplicationBuilder.Services.AddSingleton<IUnitRepository, UnitRepository>(provider =>
+    {
+        var world = provider.GetRequiredService<IWorld>();
+        var logger = provider.GetRequiredService<ILogger>();
+        var unitRepository = new UnitRepository(world, logger);
+        
+        // Bind events from the game engine to methods in the API
+        unitRepository.OnUnitCreated += (_, unitCreatedEventArgs) =>
+        {
+            unitCreatedEventArgs.Unit.OnMove += (_, unitMovedEventArgs) =>
+            {
+                var gameHub = provider.GetRequiredService<IHubContext<GameHub>>();
+                var mapper = provider.GetRequiredService<IMapper>();
+                var dto = mapper.Map<UnitMovedEventArgs>(unitMovedEventArgs);
+                gameHub.Clients.All.SendAsync("UnitMoved", dto);
+            };
+        };
+
+        return unitRepository;
+    });
 
     // Data access and logic
-    webApplicationBuilder.Services.AddSingleton<IWorldService, WorldService>();
-    webApplicationBuilder.Services.AddSingleton<ITileService, TileService>();
-    webApplicationBuilder.Services.AddSingleton<IUnitService, UnitService>();
+    webApplicationBuilder.Services.AddTransient<IWorldService, WorldService>();
+    webApplicationBuilder.Services.AddTransient<ITileService, TileService>();
+    webApplicationBuilder.Services.AddTransient<IUnitService, UnitService>();
 
     // commands - typically player specific
-    webApplicationBuilder.Services.AddSingleton<IUnitController, UnitController>();
-    webApplicationBuilder.Services.AddSingleton<IGameController, GameController>();
+    webApplicationBuilder.Services.AddTransient<IUnitController, UnitController>();
+    webApplicationBuilder.Services.AddTransient<IGameController, GameController>();
 
-    // current user information, singleton for testing until hooked into the lifecycle
-    webApplicationBuilder.Services.AddSingleton<ISessionService, SessionService>();
+    // current user information
+    webApplicationBuilder.Services.AddTransient<ISessionService, SessionService>();
 
     // ~~~~~~~~~~~~~~
 }
 
 void StartGame(WebApplication webApplication)
 {
-    var world = webApplication.Services.GetRequiredService<IWorld>();
     var worldService = webApplication.Services.GetRequiredService<IWorldService>();
     var tileService = webApplication.Services.GetRequiredService<ITileService>();
     var gameController = webApplication.Services.GetRequiredService<IGameController>();
@@ -172,18 +193,13 @@ void StartGame(WebApplication webApplication)
     var height = Convert.ToInt32(configuration["Game:Height"]);
     
     tileService.Seed(width,height);
+
     var testPlayer = worldService.AddPlayer(new Player());
     var unit = unitRepository.AddUnit(testPlayer.Id, 1, 1)!;
-    
-    MapVisualizer.DrawToConsole(world);
     
     gameController.Start(options =>
     {
         options.TickRate = 1_000;
-        // options.Tick += (sender, eventArgs) =>
-        // {
-        //     MapVisualizer.DrawToConsole(world);
-        // };
     });
     
     unitController.TryMoveUnit(unit.Id, width-1, height-1);
